@@ -1,6 +1,8 @@
 document.getElementById('tax-form').addEventListener('submit', function(e) {
     e.preventDefault(); // Empêche le rechargement de la page
 
+    console.log("Formulaire soumis");
+
     // Récupérer les valeurs du formulaire
     const grossSalaryInput = document.getElementById('gross-salary');
     const partsInput = document.getElementById('parts');
@@ -10,14 +12,20 @@ document.getElementById('tax-form').addEventListener('submit', function(e) {
     const parts = parseFloat(partsInput.value);
     const status = statusInput.value;
 
+    console.log(`Salaire Brut Entré : ${grossSalary} €`);
+    console.log(`Nombre de Parts : ${parts}`);
+    console.log(`Statut Sélectionné : ${status}`);
+
     // Validation des entrées
     if (isNaN(grossSalary) || isNaN(parts) || parts <= 0) {
         alert("Veuillez entrer des valeurs valides.");
+        console.log("Entrées invalides");
         return;
     }
 
     // Définir le taux de cotisations sociales en fonction du statut
     const cotisationRate = (status === 'cadre') ? 0.19 : 0.23; // 19% pour les cadres, 23% pour les non-cadres
+    console.log(`Taux de Cotisations Sociales : ${cotisationRate * 100}%`);
 
     // Calcul du salaire net avant impôt
     const netBeforeTax = calculateNetBeforeTax(grossSalary, cotisationRate);
@@ -33,6 +41,8 @@ document.getElementById('tax-form').addEventListener('submit', function(e) {
 
     // Calcul de l'impôt sur le revenu
     const taxPerPart = calculateTax(quotientFamilial);
+    console.log(`Impôt par Part : ${taxPerPart.toFixed(2)} €`);
+
     const totalTax = taxPerPart * parts;
     console.log(`Impôt Total: ${totalTax.toFixed(2)} €`);
 
