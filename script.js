@@ -1,10 +1,14 @@
 document.getElementById('tax-form').addEventListener('submit', function(e) {
-    e.preventDefault();
+    e.preventDefault(); // Empêche le rechargement de la page
 
     // Récupérer les valeurs du formulaire
-    const grossSalary = parseFloat(document.getElementById('gross-salary').value);
-    const parts = parseFloat(document.getElementById('parts').value);
-    const status = document.getElementById('status').value;
+    const grossSalaryInput = document.getElementById('gross-salary');
+    const partsInput = document.getElementById('parts');
+    const statusInput = document.getElementById('status');
+
+    const grossSalary = parseFloat(grossSalaryInput.value);
+    const parts = parseFloat(partsInput.value);
+    const status = statusInput.value;
 
     // Validation des entrées
     if (isNaN(grossSalary) || isNaN(parts) || parts <= 0) {
@@ -28,8 +32,8 @@ document.getElementById('tax-form').addEventListener('submit', function(e) {
     console.log(`Quotient Familial: ${quotientFamilial.toFixed(2)} €`);
 
     // Calcul de l'impôt sur le revenu
-    const tax = calculateTax(quotientFamilial);
-    const totalTax = tax * parts;
+    const taxPerPart = calculateTax(quotientFamilial);
+    const totalTax = taxPerPart * parts;
     console.log(`Impôt Total: ${totalTax.toFixed(2)} €`);
 
     // Afficher les détails du calcul
