@@ -1,51 +1,201 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f5f5f5;
-    padding: 20px;
-}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculateur d'Impôts 2024</title>
+    <style>
+        /* Styles généraux */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
 
-.container {
-    max-width: 500px;
-    margin: 0 auto;
-    background-color: #fff;
-    padding: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
 
-h1 {
-    text-align: center;
-    color: #333;
-}
+        h1 {
+            text-align: center;
+            color: #333;
+        }
 
-form {
-    display: flex;
-    flex-direction: column;
-}
+        form {
+            display: flex;
+            flex-direction: column;
+        }
 
-label {
-    margin-top: 10px;
-    margin-bottom: 5px;
-    color: #555;
-}
+        label {
+            margin-top: 10px;
+            margin-bottom: 5px;
+            color: #555;
+        }
 
-input, select, button {
-    padding: 10px;
-    font-size: 16px;
-}
+        input, select, button {
+            padding: 10px;
+            font-size: 16px;
+        }
 
-button {
-    margin-top: 20px;
-    background-color: #28a745;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-}
+        /* Styles du bouton en rose */
+        button {
+            margin-top: 20px;
+            background-color: #ff69b4; /* Rose vif */
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease; /* Pour une transition douce au survol */
+        }
 
-button:hover {
-    background-color: #218838;
-}
+        button:hover {
+            background-color: #ff1493; /* Rose profond au survol */
+        }
 
-#result p {
-    margin: 5px 0;
-    color: #333;
-}
+        #result p {
+            margin: 5px 0;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Calculateur d'Impôts sur le Revenu 2024</h1>
+        <form id="tax-form">
+            <label for="gross-salary">Salaire Brut (€) :</label>
+            <input type="number" id="gross-salary" name="gross-salary" required min="0" step="0.01" placeholder="Entrez votre salaire brut">
+
+            <label for="parts">Nombre de parts fiscales :</label>
+            <input type="number" id="parts" name="parts" required min="1" step="0.1" value="1" placeholder="Entrez le nombre de parts">
+
+            <label for="status">Statut :</label>
+            <select id="status" name="status" required>
+                <option value="cadre">Cadre</option>
+                <option value="non-cadre">Non-Cadre</option>
+            </select>
+
+            <button type="submit">Calculer</button>
+        </form>
+        <div id="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        document.getElementById('tax-form').addEventListener('submit', function(e) {
+            e.preventDefault(); // Empêche le rechargement de la page
+
+            console.log("Formulaire soumis");
+
+            // Récupérer les valeurs du formulaire
+            const grossSalaryInput = document.getElementById('gross-salary');
+            const partsInput = document.getElementById('parts');
+            const statusInput = document.getElementById('status');
+
+            const grossSalary = parseFloat(grossSalaryInput.value);
+            const parts = parseFloat(partsInput.value);
+            const status = statusInput.value;
+
+            console.log(`Salaire Brut Entré : ${grossSalary} €`);
+            console.log(`Nombre de Parts : ${parts}`);
+            console.log(`Statut Sélectionné : ${status}`);
+
+            // Validation des entrées
+            if (isNaN(grossSalary) || isNaN(parts) || parts <= 0) {
+                alert("Veuillez entrer des valeurs valides.");
+                console.log("Entrées invalides");
+                return;
+            }
+
+            // Définir le taux de cotisations sociales en fonction du statut
+            const cotisationRate = (status === 'cadre') ? 0.19 : 0.23; // 19% pour les cadres, 23% pour les non-cadres
+            console.log(`Taux de Cotisations Sociales : ${cotisationRate * 100}%`);
+
+            // Calcul du salaire net avant impôt
+            const netBeforeTax = calculateNetBeforeTax(grossSalary, cotisationRate);
+            console.log(`Salaire Net Avant Impôt: ${netBeforeTax.toFixed(2)} €`);
+
+            // Calcul du revenu imposable
+            const taxableIncome = calculateTaxableIncome(netBeforeTax);
+            console.log(`Revenu Imposable: ${taxableIncome.toFixed(2)} €`);
+
+            // Calcul du quotient familial
+            const quotientFamilial = taxableIncome / parts;
+            console.log(`Quotient Familial: ${quotientFamilial.toFixed(2)} €`);
+
+            // Calcul de l'impôt sur le revenu
+            const taxPerPart = calculateTax(quotientFamilial);
+            console.log(`Impôt par Part : ${taxPerPart.toFixed(2)} €`);
+
+            const totalTax = taxPerPart * parts;
+            console.log(`Impôt Total: ${totalTax.toFixed(2)} €`);
+
+            // Afficher les détails du calcul
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = `
+                <p><strong>Salaire Brut :</strong> ${grossSalary.toFixed(2)} €</p>
+                <p><strong>Statut :</strong> ${status === 'cadre' ? 'Cadre' : 'Non-Cadre'}</p>
+                <p><strong>Salaire Net Avant Impôt :</strong> ${netBeforeTax.toFixed(2)} €</p>
+                <p><strong>Revenu Imposable :</strong> ${taxableIncome.toFixed(2)} €</p>
+                <p><strong>Quotient Familial :</strong> ${quotientFamilial.toFixed(2)} €</p>
+                <p><strong>Impôt Estimé :</strong> ${totalTax.toFixed(2)} €</p>
+            `;
+        });
+
+        /**
+         * Calcule le salaire net avant impôt en déduisant les cotisations sociales.
+         * @param {number} grossSalary - Salaire brut en euros.
+         * @param {number} cotisationRate - Taux de cotisations sociales (0.19 pour cadres, 0.23 pour non-cadres).
+         * @returns {number} - Salaire net avant impôt.
+         */
+        function calculateNetBeforeTax(grossSalary, cotisationRate) {
+            const cotisations = grossSalary * cotisationRate;
+            return grossSalary - cotisations;
+        }
+
+        /**
+         * Calcule le revenu imposable en appliquant un abattement forfaitaire de 10%.
+         * @param {number} netBeforeTax - Salaire net avant impôt.
+         * @returns {number} - Revenu imposable.
+         */
+        function calculateTaxableIncome(netBeforeTax) {
+            const abattement = netBeforeTax * 0.10;
+            return netBeforeTax - abattement;
+        }
+
+        /**
+         * Calcule l'impôt sur le revenu en fonction du quotient familial.
+         * @param {number} quotientFamilial - Revenu imposable par part fiscale.
+         * @returns {number} - Impôt dû par part fiscale.
+         */
+        function calculateTax(quotientFamilial) {
+            let tax = 0;
+
+            // Tranches d'imposition pour 2024 (à vérifier et ajuster selon les taux officiels)
+            const brackets = [
+                { limit: 10777, rate: 0 },
+                { limit: 27478, rate: 11 },
+                { limit: 78570, rate: 30 },
+                { limit: 168994, rate: 41 },
+                { limit: Infinity, rate: 45 }
+            ];
+
+            let previousLimit = 0;
+
+            for (let bracket of brackets) {
+                if (quotientFamilial > bracket.limit) {
+                    tax += (bracket.limit - previousLimit) * (bracket.rate / 100);
+                    previousLimit = bracket.limit;
+                } else {
+                    tax += (quotientFamilial - previousLimit) * (bracket.rate / 100);
+                    break;
+                }
+            }
+
+            return tax;
+        }
+    </script>
+</body>
+</html>
